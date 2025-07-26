@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/catppuccin.css";
+@import "fumadocs-ui/css/preset.css";
+
+:root {
+  --fd-layout-width: 1400px;
+}
+
+@theme {
+  --font-mono: var(--font-geist-mono);
+}

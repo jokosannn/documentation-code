@@ -1,0 +1,608 @@
+---
+title: Nodejs Dasar
+description: Belajar Nodejs Dasar
+---
+
+# Basics
+
+NodeJS Dasar
+
+Slide PPT : https://docs.google.com/presentation/d/1-1dUV22id_QR4FbWPrR0NzQFnAr6VQVI
+
+## Pengenalan NodeJS
+
+NodeJS diperkenalkan pertama kali oleh Ryan Dahl pada tahun 2009. Ini merupakan teknologi yang bisa digunakan untuk menjalankan kode JavaScript di luar Web Browser. NodeJS dibuat dari V8 Engine, yaitu Engine untuk Google Chrome. NodeJS merupakan project yang Free dan OpenSource.
+
+Website resmi: [https://nodejs.org/](https://nodejs.org/)
+
+## Kenapa Belajar NodeJS
+
+- NodeJS mempopulerkan paradigma JavaScript Everywhere, dimana dengan menggunakan NodeJS, kita bisa membuat aplikasi berbasis server side dengan bahasa pemrograman JavaScript
+- Hal ini membuat kita hanya butuh belajar bahasa pemrograman JavaScript untuk membuat aplikasi web misalnya, sehingga tidak butuh belajar bahasa pemrograman lain seperti PHP atau Java untuk server side web nya
+- Saat ini NodeJS sangat populer dan banyak sekali digunakan di perusahaan teknologi, terutama untuk membantu pengembangan Web Frontend
+
+## Yang Tidak Bisa Dilakukan NodeJS
+
+- Karena NodeJS tidak berjalan di Browser, jadi tidak semua fitur JavaScript bisa dilakukan di NodeJS
+- Fitur seperti Document Object Model dan banyak Web API tidak bisa dilakukan di NodeJS, hal ini karena DOM dan beberapa Web API berjalan membutuhkan Browser
+
+## Web Application
+
+Web Application adalah aplikasi yang berjalan di Server dan ditampilkan di Browser Client. Terdiri dari tiga komponen utama:
+
+### Client
+
+- User interface atau bagian frontend dari web application.
+- Digunakan untuk berinteraksi dengan Server.
+- Biasanya dibuat menggunakan HTML, CSS, dan JavaScript.
+
+### Server
+
+- Bertanggung jawab untuk menerima dan memproses request dari Client.
+- Bertugas sebagai backend untuk web application.
+- Dengan NodeJS, kita bisa membuat Server menggunakan JavaScript.
+
+### Database
+
+- Tempat untuk menyimpan data web application.
+- Data disimpan dan diambil oleh Server.
+- Client tidak bisa langsung mengakses Database.
+
+## Concurrency dan Parallel
+
+### Sejarah
+
+Evolusi dari komputasi sekuensial ke parallel dan concurrent computing.
+
+### Thread
+
+- Proses ringan dalam sebuah aplikasi.
+- Memungkinkan aplikasi untuk menjalankan beberapa tugas secara bersamaan.
+
+### Concurrency vs Parallel
+
+- Concurrency: Mengerjakan beberapa pekerjaan satu persatu.
+- Parallel: Mengerjakan beberapa pekerjaan sekaligus pada satu waktu.
+
+### Synchronous vs Asynchronous
+
+- Synchronous: Kode dieksekusi secara berurutan.
+- Asynchronous: Kode dieksekusi tanpa menunggu operasi sebelumnya selesai.
+
+### Threadpool
+
+- Konsep manajemen thread untuk optimalisasi kinerja.
+- Threadpool Queue untuk mengelola tugas yang belum dikerjakan.
+
+## Instalation
+
+1. Manual download dari [nodejs.org](https://nodejs.org/en/download/)
+2. Menggunakan package manager:
+   - NVM: [https://github.com/nvm-sh/nvm](https://github.com/nvm-sh/nvm)
+   - Chocolatey: [https://community.chocolatey.org/packages/nodejs](https://community.chocolatey.org/packages/nodejs)
+   - Homebrew: [https://formulae.brew.sh/formula/node](https://formulae.brew.sh/formula/node)
+
+## Menjalankan Kode JavaScript
+
+Karena NodeJS tidak memerlukan Web Browser, jadi kita bisa langsung menjalankan program JavaScript kita menggunakan aplikasi NodeJS lewat terminal / command promt, dengan perintah :
+
+Buat file `hello-world.js`
+
+```js title="hello-world.js"
+console.log("Hello World");
+```
+
+Next, Jalankan dengan perintah di `terminal / command promt`:
+
+```bash
+node namafile.js
+```
+
+## NodeJS Standard Library
+
+```js title="index.js"
+const fs = require("fs");
+```
+
+```js title="index.mjs"
+import fs from "fs";
+```
+
+## NodeJS API
+
+### OS
+
+OS merupakan standard library yang bisa digunakan untuk mendapatkan informasi tentang sistem operasi yang digunakan
+
+https://nodejs.org/dist/latest-v16.x/docs/api/os.html
+
+```js title="os.mjs"
+import os from "os";
+
+console.info(os.platform());
+console.info(os.arch());
+//...
+```
+
+### Path
+
+Path merupakan standard library yang bisa kita gunakan untuk bekerja dengan lokasi file dan directory / folder
+
+https://nodejs.org/dist/latest-v16.x/docs/api/path.html
+
+```js title="path.mjs"
+import path from "node:path";
+
+const file = "/Users/joko/index.html";
+
+console.info(path.dirname(file));
+console.info(path.basename(file));
+console.info(path.extname(file));
+//...
+```
+
+### File System
+
+- File System merupakan standard library yang bisa digunakan untuk memanipulasi file system
+- Dalam File System, terdapat 3 jenis library
+- Pertama library yang bersifat blocking atau `synchronous`
+- Kedua library yang bersifat non-blocking atau asynchronous menggunakan `callback`
+- Ketika library yang bersifat non-blocking atau asynchronous tapi menggunakan `promise`
+
+https://nodejs.org/dist/latest-v16.x/docs/api/fs.html
+
+#### Promise
+
+```js title="fs-promise.mjs"
+import * as fs from "node:fs/promises";
+
+const readFile = await fs.readFile("src/async.mjs", "utf-8");
+console.log(readFile);
+
+await fs.writeFile("txt/temp.txt", "Hello Nodejs!!", "utf-8");
+console.log("success create file temp.txt");
+```
+
+#### sync
+
+```js title="fs-sync.mjs"
+import * as fs from "node:fs";
+
+const readFile = fs.readFileSync("src/async.mjs", "utf-8");
+console.log(readFile);
+
+await fs.writeFileSync("txt/temp.txt", "Hello Nodejs!!", "utf-8");
+console.log("success create file temp.txt");
+```
+
+#### Callback
+
+```js title="fs-callback.mjs"
+import * as fs from "node:fs";
+
+fs.readFile("/tmp/hello.txt", (data, err) => {
+  if (err) throw err;
+  console.log(data);
+});
+```
+
+### Debugger
+
+- NodeJS memiliki fitur debugger, dimana kita bisa mengikuti tahapan eksekusi program di NodeJS
+- Hal ini sangat cocok ketika kita melakukan proses debugging, mencari sebab masalah yang terjadi di aplikasi kita
+
+https://nodejs.org/dist/latest-v16.x/docs/api/debugger.html
+
+```bash title="Terminal"
+node inspect namafile.js
+
+● cont, c: Continue execution
+● next, n: Step next
+● step, s: Step in
+● out, o: Step out
+● pause: Pause running code
+```
+
+```js title="debugger.mjs"
+function sayHello(number) {
+  // highlight-start
+  debugger;
+  // highlight-end
+  return 2 * number;
+}
+
+console.info(sayHello(7));
+```
+
+### DNS
+
+DNS merupakan standard library yang bisa digunakan untuk bekerja dengan DNS (domain name server)
+
+https://nodejs.org/dist/latest-v16.x/docs/api/dns.html
+
+```js title="dns.mjs"
+import dns from "node:dns/promises";
+
+const data = await dns.resolve4("www.youtube.com");
+let hostname = [];
+data.forEach((e, host) => {
+  hostname.push({ e, host });
+});
+console.log(hostname);
+```
+
+### Events
+
+- Events adalah standard library di NodeJS yang bisa digunakan sebagai implementasi Event Listener
+- Di dalam Events, terdapat sebuah class bernama EventEmitter yang bisa digunakan untuk menampung data listener per jenis event.
+- Lalu kita bisa melakukan emmit untuk mentrigger jenis event dan mengirim data ke event tersebut
+
+https://nodejs.org/dist/latest-v16.x/docs/api/events.html
+
+```js title="event.mjs"
+import { EventEmitter } from "node:events";
+
+const emiter = new EventEmitter();
+
+// addListener(:eventName, :listener)
+emiter.addListener("hello", (name) => {
+  console.info(`hello ${name}`);
+});
+
+emiter.addListener("hello", (name) => {
+  console.info(`hallo ${name}`);
+});
+
+// emit(eventName, args)
+emiter.emit("hello", "joko");
+```
+
+### Global
+
+- Di dalam NodeJS, terdapat library berupa variable atau function yang secara global bisa diakses dimana saja, tanpa harus melakukan import
+- Kita bisa melihat detail apa saja fitur yang terdapat secara global di halaman dokumentasinya
+
+https://nodejs.org/dist/latest-v16.x/docs/api/globals.html
+
+```js title="global.mjs"
+setTimeout(() => {
+  console.log("nunggu 2d baru muncul");
+}, 2000);
+```
+
+### Process
+
+- Process merupakan standard library yang digunakan untuk mendapatkan informasi proses NodeJS yang sedang berjalan
+- Process juga merupakan instance dari EventEmitter, sehingga kita bisa menambahkan listener kedalam Process
+
+https://nodejs.org/dist/latest-v16.x/docs/api/process.html
+
+```js title="process.mjs"
+import process from "node:process";
+
+process.addListener("exit", (exitCode) => {
+  console.log("Exit code" + exitCode);
+});
+
+console.info(process.version);
+console.table(process.argv);
+console.info(process.env.USERNAME);
+
+process.exit(1);
+
+// hello tidak akan di eksekusi
+console.log("hello");
+```
+
+### Readline
+
+- Readline merupakan standard library yang digunakan untuk membaca input
+- Readline hanya mendukung versi callback di versi NodeJS 16
+- Namun di NodeJS 17 sudah mendukung Promise sehingga lebih mudah digunakan
+
+https://nodejs.org/dist/latest-v16.x/docs/api/readline.html
+
+```js title="readline.mjs"
+import * as readline from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
+
+const rl = readline.createInterface({ input, output });
+const answer = await rl.question("siapa nama Anda? ");
+console.log(`nama saya ${answer}`);
+
+rl.close();
+```
+
+### Report
+
+Report merupakan fitur yang terdapat di NodeJS untuk membuat laporan secara otomatis dalam file ketika sesuatu terjadi pada aplikasi NodeJS kita
+
+https://nodejs.org/dist/latest-v16.x/docs/api/report.html
+
+```js title="report.js"
+import * as readline from "node:readline/promises";
+import process from "node:process";
+
+process.report.reportOnUncaughtException = true;
+process.report.reportOnFatalError = true;
+process.report.reportOnSignal = true;
+process.report.filename = "data/report-error.json";
+
+function newError() {
+  throw new Error("Upss!!!");
+}
+
+newError();
+```
+
+### Buffer
+
+- Buffer merupakan object yang berisikan urutan byte dengan panjang tetap.
+- Buffer merupakan turunan dari tipe data Uint8Array.
+
+https://nodejs.org/dist/latest-v16.x/docs/api/buffer.html
+
+```js title="buffer.js"
+const buffer = Buffer.from("Joko Santoso");
+
+console.info(buffer);
+console.info(buffer.toString());
+
+buffer.reverse();
+console.log(buffer.toString());
+```
+
+#### Buffer Encoding
+
+- Buffer juga bisa digunakan untuk melakukan encoding dari satu encoding ke encoding yang lain
+- Ada banyak encoding yang didukung oleh Buffer, misal utf8, ascii, hex, base64, base64url dan lain-lain
+
+```js title="buffer-encoding.js"
+const buffer = Buffer.from("Joko Santoso", "utf-8");
+
+console.info(buffer.toString());
+console.info(buffer.toString("base64"));
+console.info(buffer.toString("hex"));
+
+const bufferBase64 = Buffer.from("Sm9rbyBTYW50b3Nv", "base64");
+console.info(bufferBase64.toString("utf-8"));
+```
+
+### Stream
+
+- Stream adalah standard library untuk kontrak aliran data di NodeJS
+- Ada banyak sekali Stream object di NodeJS
+- Stream bisa jadi object yang bisa dibaca, atau bisa di tulis, dan Stream adalah turunan dari EventEmitter
+
+https://nodejs.org/dist/latest-v16.x/docs/api/stream.html
+
+```js title="stream.mjs"
+import fs from "node:fs";
+
+const writer = fs.createWriteStream("data/target-stream.log");
+writer.write("Joko\n");
+writer.write("Santoso\n");
+writer.write("Ganteng\n");
+
+writer.end();
+
+const reader = fs.createReadStream("data/target-stream.log");
+
+reader.addListener("data", (data) => {
+  console.info(data.toString());
+});
+```
+
+### Timer
+
+- Timer merupakan standard library untuk melakukan scheduling
+- Function di Timer terdapat di globals, sehingga kita bisa menggunakannya tanpa melakukan import, namun semua function Timer menggunakan Callback
+- Jika kita ingin menggunakan Timer versi Promise, kita bisa meng-import dari module timer/promise
+
+https://nodejs.org/dist/latest-v16.x/docs/api/timers.htmlj
+
+```js title="timer.mjs"
+import { setInterval } from "node:timers/promises";
+
+// global
+setInterval(() => {
+  console.log(`Timer at ${new Date()}`);
+}, 1000);
+
+// promise
+const interval = 1000;
+for await (const startTime of setInterval(interval, Date.now())) {
+  const now = Date.now();
+  console.log(now);
+  if (now - startTime > 5000) break;
+}
+console.log(Date.now());
+```
+
+### Net
+
+- Net merupakan standard library yang bisa digunakan untuk membuat network client dan server berbasis TCP
+- Net Server dan Client merupakan object Stream, sehingga kita bisa baca datanya, tulis datanya dan juga menambahkan listener
+
+https://nodejs.org/dist/latest-v16.x/docs/api/net.html
+
+#### Net Server
+
+```js title="net-server.mjs"
+import net from "net";
+
+const server = net.createServer((c) => {
+  console.log("client conected!");
+
+  c.on("data", (data) => {
+    console.log("Data: " + data.toString());
+    c.write(`hello ${data.toString()}\r\n`);
+  });
+});
+
+server.listen(3000, "localhost");
+```
+
+#### Net Client
+
+```js title="net-client.mjs"
+import net from "net";
+
+const client = net.createConnection({ port: 3000, host: "localhost" });
+
+client.addListener("data", (data) => {
+  console.info(`data from server : ${data.toString()}`);
+});
+
+setInterval(() => {
+  client.write(`${process.argv[2]}\r\n`);
+}, 2000);
+```
+
+### URL
+
+URL merupakan standard library untuk bekerja dengan URL
+
+https://nodejs.org/dist/latest-v16.x/docs/api/url.html
+
+```js title="url.mjs"
+import { URL } from "node:url";
+
+const myUrl = new URL("https://codesann.com/profile?age=21");
+
+myUrl.searchParams.append("country", "indonesia");
+
+console.info(myUrl);
+
+/*
+output:
+URL {
+  href: 'https://codesann.com/profile?age=21&country=indonesia',
+  origin: 'https://codesann.com',
+  protocol: 'https:',
+  username: '',
+  password: '',
+  host: 'codesann.com',
+  hostname: 'codesann.com',
+  port: '',
+  pathname: '/profile',
+  search: '?age=21&country=indonesia',
+  searchParams: URLSearchParams { 'age' => '21', 'country' => 'indonesia' },
+  hash: ''
+}
+*/
+```
+
+### Console
+
+- Console adalah standard library yang sudah sering kita gunakan
+- Secara global, object console bisa kita gunakan tanpa harus melakukan import module, dan console melakukan print text nya ke stdout
+- Namun jika kita juga bisa membuat object Console sendiri jika kita mau
+
+https://nodejs.org/dist/latest-v16.x/docs/api/console.html
+
+```js title="console.mjs"
+import { Console } from "console";
+import fs from "node:fs";
+
+const file = fs.createWriteStream("data/console.log");
+
+const log = new Console({
+  stdout: file,
+  stderr: file,
+});
+
+const person = {
+  name: "Joko Santoso",
+  age: 21,
+};
+
+log.info("hello world");
+log.error("Error: hello world");
+log.table(person);
+```
+
+### HTTP
+
+#### Client
+
+- NodeJS juga memiliki standard library untuk HTTP
+- Salah satu fitur di module HTTP adalah HTTP Client, dimana kita bisa melakukan simulasi HTTP Request menggunakan NodeJS
+- Terdapat 2 jenis module HTTP di NodeJS, `HTTP` dan `HTTPS`
+
+1. [HTTP](https://nodejs.org/dist/latest-v16.x/docs/api/http.html)
+1. [HTTPS](https://nodejs.org/dist/latest-v16.x/docs/api/https.html)
+
+```js title="http-client.mjs"
+import http from "http";
+
+const url = "https://eofeih3io4xch6p.m.pipedream.net";
+
+const request = http.request(
+  url,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "Aplication/json",
+      Accept: "Application/json",
+    },
+  },
+  (response) => {
+    response.addListener("data", (data) => {
+      console.log("Data :" + data);
+    });
+  }
+);
+
+const data = JSON.stringify({
+  firstName: "joko",
+  lastName: "santoso",
+});
+
+request.write(data);
+request.end();
+```
+
+#### Server
+
+- Standard Library HTTP juga tidak hanya bisa digunakan untuk membuat HTTP Client, tapi juga bisa digunakan untuk membuat HTTP Server
+- Untuk kasus sederhana, cocok sekali jika ingin membuat HTTP Server menggunakan standard library NodeJS, namun untuk kasus yang lebih kompleks, direkomendasikan menggunakan library atau framework yang lebih mudah penggunaannya
+
+https://nodejs.org/dist/latest-v16.x/docs/api/http.html
+
+```js title="http-server.mjs"
+import http from "node:http";
+import url from "node:url";
+
+const server = http.createServer((req, res) => {
+  const Url = url.parse(req.url, true);
+
+  if (Url.pathname === "/product") {
+    console.info(Url.query); /* {id: '1'} */
+
+    res.writeHead(200, "sucess", {
+      "Content-Type": "Application/json",
+      accept: "Application/json",
+    });
+    res.end("hello from product");
+  } else {
+    if (req.method === "POST") {
+      req.addListener("data", (data) => {
+        res.writeHead(200, "sucess", {
+          "Content-Type": "Application/json",
+          accept: "Application/json",
+        });
+        res.end(data);
+      });
+    } else {
+      res.writeHead(200, "sucess", {
+        "Content-Type": "Application/json",
+        accept: "Application/json",
+      });
+      res.end("hello from server");
+    }
+  }
+});
+
+server.listen(8000);
+```

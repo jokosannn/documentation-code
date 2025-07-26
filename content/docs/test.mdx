@@ -1,0 +1,32 @@
+---
+title: Components
+description: Components
+---
+
+## Code Block
+
+```js
+console.log("Hello World");
+```
+
+## Cards
+
+<Cards>
+  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
+  <Card title="Learn more about Fumadocs" href="https://fumadocs.vercel.app" />
+</Cards>
+
+```js {2}
+import defaultComponents from "fumadocs-ui/mdx";
+import { APIPage } from "fumadocs-openapi/ui";
+import { openapi } from "@/lib/source";
+import type { MDXComponents } from "mdx/types";
+
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
+    ...defaultComponents,
+    APIPage: (props) => <APIPage {...openapi.getAPIPageProps(props)} />,
+    ...components,
+  };
+}
+```
