@@ -1,0 +1,355 @@
+---
+title: Nodejs Logging
+description: Belajar Nodejs Logging
+---
+
+# Logging
+
+NodeJS Logging - Winston
+
+Slide PPT: https://docs.google.com/presentation/d/1-6kKXVX4-oknq0Hvawypgq58Rtazbr5X
+
+## Pengenalan Logging
+
+Logging adalah proses pencatatan atau pengumpulan data tentang berbagai aktivitas atau peristiwa yang terjadi dalam suatu sistem atau aplikasi.
+
+Diluar NodeJS Logging, banyak sekali library yang bisa kita gunakan untuk logging, seperti:
+
+1. [Winston](https://www.npmjs.com/package/winston)
+2. [Bunyan](https://www.npmjs.com/package/bunyan)
+3. [Pino](https://www.npmjs.com/package/pino)
+4. [Loglevel](https://www.npmjs.com/package/loglevel)
+5. [NPMLog](https://www.npmjs.com/package/npmlog)
+
+Disini saya akan menggunakan `Winston`
+
+## Installation
+
+```bash
+npm install winston
+```
+
+Next, import it into your Node.js application:
+
+```js
+import winston from "winston";
+```
+
+## Logger
+
+- Logger adalah sebuah object di Winston, yang digunakan untuk melakukan logging
+- Untuk membuat object Logger, kita bisa menggunakan function `createLogger()` yang terdapat di package/module winston
+
+```js
+const logger = winston.createLogger({
+  // ...
+});
+logger.log("something!!!");
+```
+
+## Console Transport
+
+- Saat membuat Logger, secara default Logger tidak akan menggunakan Transport
+- Apa itu Transport? Transport adalah destinasi atau target yang digunakan untuk mengirim log.
+- Ada banyak sekali Transport, salah satunya yang paling sederhana adalah `Console`
+- Console merupakan Transport yang digunakan untuk mengirim data log ke console/stdout
+
+```js
+const logger = winston.createLogger({
+  // highlight-start
+  transports: [new winston.transports.Console({})],
+  // highlight-end
+});
+```
+
+## Level
+
+- Dalam logging, terdapat istilah yang bernama Level, Level biasanya digunakan sebagai informasi seberapa penting log tersebut
+- Level dimulai dari paling rendah ke paling tinggi, semakin tinggi Level nya, artinya semakin penting informasi log tersebut
+- Untuk menambahkan Level ketika melakukan log, kita bisa ubah attribute level menjadi level yang kita inginkan
+
+#### Winston Level
+
+- `error`
+- `warn`
+- `info`
+- `http`
+- `verbose`
+- `debug`
+- `silly`
+
+:::note
+
+- Secara `default`, saat kita membuat Logger, Logger hanya akan menampilkan log dengan level `info` atau level diatasnya
+- Jika kita ingin mengubah log level mana yang ingin kita tampilkan, maka kita perlu ubah konfigurasi level ketika kita membuat logger, dengan menggunakan level minimal yang ingin kita tampilkan
+
+:::
+
+```js
+const logger = winston.createLogger({
+  // highlight-start
+  level:  process.env.LOG_LEVEL || 'debug'
+  // highlight-end
+  transports: [new winston.transports.Console({})],
+});
+```
+
+:::tip
+
+- Logger juga memiliki function shortcut yang bisa digunakan untuk melakukan logging, sehingga kita tidak perlu menggunakan function log dan object dengan attribute level lagi
+- Kita bisa langsung menggunakan function dengan nama sesuai dengan level nya, misal logger.info(message), logger.warn(message), dan lain-lain
+
+:::
+
+```js
+logger.log("..."); // bofore
+// highlight-start
+logger.debug("..."); //after
+// highlight-end
+// other logger
+```
+
+## Format
+
+- Format adalah object yang digunakan untuk melakukan formatting data log sebelum dikirim ke Transport
+- Saat kita membuat Logger, secara default, Logger akan akan menggunakan `JSON` Format, artinya data akan dikirim dalam bentuk JSON
+- Winston juga menyediakan banyak format lain selain JSON
+
+#### Winston Format
+
+```js
+align();
+cli();
+colorize();
+combine();
+errors();
+json();
+label();
+logstash();
+metadata();
+ms();
+padLevels();
+prettyPrint();
+printf();
+simple();
+splat();
+timestamp();
+uncolorize();
+```
+
+```js
+const logger = winston.createLogger({
+  level:  process.env.LOG_LEVEL || 'debug'
+  // highlight-start
+  format: winston.format.simple()
+  // highlight-end
+  transports: [new winston.transports.Console({})],
+});
+```
+
+#### Membuat format sendiri
+
+- Winston menyediakan format `printf`, yang bisa digunakan untuk membuat format sendiri
+
+```js
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || "debug",
+  // highlight-start
+  format: winston.format.printf((info) => {
+    return `${new Date()} : ${info.level.toUpperCase()} : ${info.message}`;
+  }),
+  // highlight-end
+  transports: [new winston.transports.Console({})],
+});
+```
+
+## Combine Format
+
+- Winston memiliki fitur bernama Combine Format, dimana kita bisa melakukan kombinasi beberapa Format sekaligus
+- Ini cocok untuk menambah informasi tambahan ke log data, misal data timestamp, data jarak waktu antar log, dan lain-lain
+- Kita bisa menggunakan Combine Format di Winston untuk menggabungkan beberapa Format
+
+```js
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || "debug",
+  // highlight-start
+  format: winston.format.combine(winston.format.timestamp(), winston.format.ms(), winston.format.json()),
+  // highlight-end
+  transports: [new winston.transports.Console({})],
+});
+```
+
+## File Transport
+
+- Sebelumnya kita hanya menggunakan Console Transport, selain Console Transport, di Winston juga terdapat File Transport
+- Dari namanya kita sudah tahu, bahwa Transport ini akan menyimpan data log ke file
+- Kita bisa menambahkan langsung beberapa Transport dalam satu Logger object
+
+```js
+const logger = winston.createLogger({
+  // level
+  //format
+  transports: [
+    // highlight-start
+    new winston.transports.Console({}),
+    new winston.transports.File({
+      filename: "transport.log",
+    }),
+    // highlight-end
+  ],
+});
+```
+
+## Transport Level
+
+- Beberapa Transport memiliki pengaturan Level sendiri
+- Saat sebuah Transport memiliki pengaturan Level, secara otomatis Transport hanya akan menerima log dengan level tersebut atau yang lebih tinggi
+- Hal ini sangat cocok misal ketika kita ingin memisahkan beberapa level log di transport yang berbeda
+
+```js
+const logger = winston.createLogger({
+  // level
+  // format
+  transports: [
+    new winston.transports.Console({}),
+    new winston.transports.File({
+      filename: 'transport.log',
+    }),
+      // highlight-start
+    new winston.transports.File({
+      level: 'error'
+      filename: 'transport-error.log',
+    }),
+    // highlight-end
+  ],
+});
+```
+
+```bash title="transport.log"
+{"level":"info","message":"Hello World.","timestamp":"2024-10-13T14:52:59.297Z"}
+{"level":"info","message":"Hello World.","timestamp":"2024-10-13T14:52:59.311Z"}
+{"level":"info","message":"Hello World.","timestamp":"2024-10-13T14:52:59.312Z"}
+{"level":"error","message":"Hello Error!.","timestamp":"2024-10-13T14:52:59.312Z"}
+{"level":"error","message":"Hello Error!.","timestamp":"2024-10-13T14:52:59.313Z"}
+```
+
+```bash title="transport-error.log"
+{"level":"error","message":"Hello Error!.","timestamp":"2024-10-13T14:52:59.312Z"}
+{"level":"error","message":"Hello Error!.","timestamp":"2024-10-13T14:52:59.313Z"}
+```
+
+## Rotate File
+
+- Secara default, winston Transport File hanya akan menyimpan semua log di dalam satu file
+- Hal ini akan sangat berbahaya ketika aplikasi berjalan dalam jangka waktu lama, sehingga menyebabkan ukuran file akan semakin membesar
+
+Winston sendiri membuat package terpisah untuk membantu ini, yaitu `Daily Rotate File`
+
+https://www.npmjs.com/package/winston-daily-rotate-file
+
+Package ini bisa digunakan untuk membuat rotasi file transport secara otomatis sesuai aturan yang kita tentukan, dan bisa secara otomatis menghapus file lama ketika sudah tidak diperlukan lagi
+
+### Instal Package Daily Rotate File
+
+```bash
+npm install winston-daily-rotate-file
+```
+
+Next
+
+```js
+import DailyRotateFile from "winston-daily-rotate-file";
+
+const logger = winston.createLogger({
+  // ...
+  transports: [
+    new winston.transports.Console({}),
+    // highlight-start
+    new DailyRotateFile({
+      filename: "app-%DATE%.log",
+      zippedArchive: true,
+      maxSize: "1m", // 1 mega
+      maxFiles: "14d", // 14 hari
+    }),
+    // highlight-end
+  ],
+});
+```
+
+## Exception and Rejections
+
+- Saat kita membuat program NodeJS, kadang kita lupa menangkap Exception
+- Hal ini bisa berbahaya karena nanti kita tidak bisa melakukan debug Exception dengan baik, sehingga tidak bisa kita investigasi selanjutnya
+
+### Handle Exceptions
+
+- Winston memiliki fitur secara otomatis yang bisa digunakan untuk menangkap Exception yang belum ter-handle
+- Kita bisa lakukan pengaturan ini di Logger, yang secara otomatis exception akan dikirim ke semua Transport
+- Atau kita bisa lakukan pengaturan ini di Transport
+
+```js title="hello.js"
+hello();
+```
+
+```js
+const logger = winston.createLogger({
+  // ...
+  transports: [
+    new winston.transports.Console({}),
+    new winston.transports.File({
+      // highlight-start
+      handleExceptions: true,
+      // highlight-end
+      filename: "exception.log",
+    }),
+  ],
+});
+```
+
+### Handle Rejections
+
+- Sama seperti handle `exception` namun versi `promise reject`
+
+```js title="async.js"
+async function callAsync() {
+  return Promise.reject("Ups!!");
+}
+
+callAsync();
+```
+
+```js
+const logger = winston.createLogger({
+  // ...
+  transports: [
+    new winston.transports.Console({}),
+    new winston.transports.File({
+      // highlight-start
+      handleRejections: true,
+      // highlight-end
+      filename: "exception.log",
+    }),
+  ],
+});
+```
+
+:::tip[Tips]
+
+- Anda bisa langsung menggabungkan antara exceptions dan rejections
+  :::
+
+```js
+const logger = winston.createLogger({
+  // ...
+  transports: [
+    new winston.transports.Console({}),
+    new winston.transports.File({
+      // highlight-start
+      handleExceptions: true,
+      handleRejections: true,
+      // highlight-end
+      filename: "exception.log",
+    }),
+  ],
+});
+```

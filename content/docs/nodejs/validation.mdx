@@ -1,0 +1,265 @@
+---
+title: Nodejs Validation
+description: Belajar Nodejs Validation
+---
+
+# Validation
+
+NodeJS Validation - Joi
+
+Slide PPT : https://docs.google.com/presentation/d/1-OR7TuDYvEIdo2RUVOfITxheICVapDnp
+
+## Validasi di NodeJS
+
+- NodeJS sayangnya tidak menyediakan package untuk validasi, oleh karena itu kita perlu melakukan validasi secara manual
+- Tapi untungnya, banyak package yang dibuat oleh komunitas programmer NodeJS yang bisa kita gunakan untuk mempermudah kita melakukan validasi
+- Salah satu library yang populer untuk melakukan validasi adalah library `Joi`
+  - https://www.npmjs.com/package/joi
+
+## Install Joi
+
+```bash
+npm install Joi
+```
+
+## Validation
+
+Setelah menginstall Joi, hal pertama yang perlu kita lakukan untuk melakukan validasi adalah membuat Schema
+Schema adalah aturan-aturan yang sudah kita tentukan.
+
+Setelah membuat schema, baru selanjutnya kita bisa melakukan validasi data menggunakan schema tersebut.
+
+### Basic validation
+
+```js
+import Joi from "Joi";
+
+const emailSchema = Joi.string().email().required();
+const isAdminSchema = Joi.boolean().required();
+const priceSchema = Joi.number().required().min(1000).max(100000);
+
+const resultEmail = emailSchema.validate("joko@gmail.com");
+const resultIsAdmin = isAdminSchema.validate("true"); // otomatis akan d konversi oleh joi
+const resultPrice = priceSchema.validate("10000"); // otomatis akan d konversi oleh joi
+```
+
+### Date Validation
+
+```js
+const birthDateSchema = Joi.date().required().max("now").min("1-1-2000");
+
+const result1 = birthDateSchema.validate("1-1-1999");
+const result2 = birthDateSchema.validate("1-1-2008");
+const result3 = birthDateSchema.validate("1-1-2026");
+```
+
+## Validation Result
+
+- Saat kita melakukan validasi menggunakan method `validate()`, hasil dari method tersebut adalah object yang memiliki attribute value dan error
+- Hasil data akan ada di attribute `value`, contohnya misal kita validasi Date namun inputnya berupa String, maka secara otomatis value Date yang akan di konversi ke `result.value`
+- Namun jika terjadi error, secara otomatis `result.error nya` berisi ValidationError
+
+## Validation Error
+
+Detail : https://joi.dev/api/?v=17.9.1#validationerror
+
+```js
+const usernameSchema = Joi.string().min(5).email().required();
+
+const result = usernameSchema.validate("ups", { abortEarly: false });
+
+if (result.error) {
+  result.error.details.forEach((detail) => {
+    console.info(`${detail.path} - ${detail.message}`);
+  });
+}
+```
+
+## Validation Option
+
+Saat kita melakukan validasi menggunakan validate() method, sebenarnya terdapat opsi tambahan yang bisa kita kirim untuk mengatur cara melakukan validasi
+
+Detail : https://joi.dev/api/?v=17.9.1#anyvalidatevalue-options
+
+```js
+// default ->  error akan ditampilkan satu saja
+// abortEarly -> untuk menampilkan seluruh error
+const result = usernameSchema.validate("ups", { abortEarly: false });
+```
+
+## Object Validation
+
+- Saat kita membuat aplikasi, kita sering sekali membuat JavaScript Object
+- Untungnya Joi juga bisa digunakan untuk melakukan validasi JS Object, sehingga mempermudah kita untuk melakukan sekaligus ke semua field di JS Object
+
+Detail : https://joi.dev/api/?v=17.9.1#object
+
+```js
+const createUserSchema = Joi.object({
+  email: Joi.string().min(2).email().required(),
+  password: Joi.string().min(6).max(12).required(),
+});
+
+const user = {
+  email: "test@gmail.com",
+  password: "qwerty123",
+};
+
+const result = createUserSchema.validate(user, { abortEarly: false });
+
+if (result.error) {
+  result.error.details.forEach((detail) => {
+    console.log(`${detail.path} - ${detail.message}`);
+  });
+} else {
+  console.log(result);
+}
+```
+
+### Nested Object
+
+Joi juga bisa digunakan untuk memvalidasi nested object, saat kita ingin memvalidasi nested object, kita harus tentung object schema nya juga
+
+```js
+const createUserSchema = Joi.object({
+  email: Joi.string().min(2).email().required(),
+  password: Joi.string().min(6).max(12).required(),
+  address: Joi.object({
+    street: Joi.string().min(1).max(100).required(),
+    city: Joi.string().min(1).max(100).required(),
+  }).required(),
+});
+
+const address = {
+  email: "joko@gmail.com",
+  password: "qwerty123",
+  address: {
+    street: "jalan nangka",
+    city: "pekanbaru",
+  },
+};
+
+const result = createUserSchema.validate(address, { abortEarly: false });
+
+if (result.error) {
+  result.error.details.forEach((detail) => {
+    console.log(`${detail.path} - ${detail.message}`);
+  });
+} else {
+  console.log(result);
+}
+```
+
+## Array Validation
+
+- Selain Object, kita juga bisa melakukan validasi di data Array
+- Baik itu array dengan isi data sederhana, atau array dengan isi data object
+
+Detail : https://joi.dev/api/?v=17.9.1#array
+
+### Array Tunggal
+
+```js
+const createArraySchema = Joi.array().items(Joi.string().min(1).required()).min(1).unique();
+
+const array = ["A", "coding", "coding"];
+
+const result = createArraySchema.validate(array, { abortEarly: false });
+```
+
+### Array of Object
+
+Untuk melakukan validasi Array of Object, kita bisa kombinasikan schema array dan schema object
+
+```js
+const createArraySchema = Joi.array()
+  .items(
+    Joi.object({
+      email: Joi.string().email().required(),
+      password: Joi.string().min(1).required(),
+    })
+  )
+  .min(1)
+  .unique();
+
+const array = [
+  {
+    email: "joko",
+    password: "qwerty123",
+  },
+];
+
+const result = createArraySchema.validate(array, { abortEarly: false });
+```
+
+## Custom Validation Message
+
+- Saat kita menggunakan validation milik Joi, terdapat default error message yang direpresentasikan menggunakan message key
+- Kita bisa lihat semua message key dan value nya di disini :
+  - https://joi.dev/api/?v=17.9.1#list-of-errors
+- Jika kita mau, kita bisa mengubah value dari message key, ketika membuat schema, sehingga secara otomatis
+- Untuk menggubah message nya, kita bisa menggunakan method messages() pada schema
+  - https://joi.dev/api/?v=17.9.1#anymessagesmessages
+
+```js
+const schema = Joi.string().min(2).max(10).required().messages({
+  "any.required": "{{#label}} harus diisi",
+  "string.min": "{{#label}} harus minimal {{#limit}} karakter",
+  "string.max": "{{#label}} harus maksimal {{#limit}} karakter",
+});
+
+// costom object
+const schema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "any.required": "{{#label}} harus diisi",
+    "string.email": "{{#label}} harus email",
+  }),
+  password: Joi.string().min(6).max(10).required().messages({
+    "any.required": "{{#label}} harus diisi",
+    "string.min": "{{#label}} harus minimal {{#limit}} karakter",
+    "string.max": "{{#label}} harus maksimal {{#limit}} karakter",
+  }),
+});
+```
+
+## Custom Validation
+
+- Saat kita membutuhkan validasi yang tidak disediakan di Joi, kita juga bisa buat custom validation di Joi
+- Terdapat method `custom()` di semua Schema yang bisa kita gunakan untuk menambah validasi baru
+
+Detail : https://joi.dev/api/?v=17.9.1#anycustommethod-description
+
+```js
+const paswordConfirmSchema = Joi.object({
+  password: Joi.string()
+    .required()
+    .min(6)
+    .max(12)
+    .custom((value, helper) => {
+      if (value.startsWith("joko")) {
+        return helper.error("password.wrong");
+      }
+      return value;
+    })
+    .messages({
+      "password.wrong": "password tidak boleh dimulai dengan kalimat joko",
+    }),
+  confirmPassword: Joi.string().required().min(6).max(12),
+})
+  .custom((value, helper) => {
+    if (value.password !== value.confirmPassword) {
+      return helper.error("register.password.different");
+    }
+    return value;
+  })
+  .message({
+    "register.password.different": "password harus sama",
+  });
+
+const register = {
+  password: "test123",
+  confirmPassword: "test123",
+};
+
+const result = paswordConfirmSchema.validate(register, { abortEarly: false });
+```

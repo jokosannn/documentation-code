@@ -1,0 +1,256 @@
+---
+title: Nodejs Database
+description: Belajar Nodejs Database
+---
+
+# Database
+
+NodeJS Database - Prisma
+
+Tidak seperti teknologi lain seperti PHP, Java, dan lain-lain yang menyediakan standard library untuk database, di NodeJS Standard Library sayangnya tidak menyediakan fitur untuk database, oleh karena itu, untuk menggunakan database kita harus menambahkan dependency lain, tergantung database nya.
+
+Ada banyak database package library yang bisa kita gunakan, tergantung databasenya
+Hal ini juga menjadi masalah, karena akhirnya tidak database, kita harus menggunakan package library yang berbeda, dan cara menggunakannya pun berbeda-beda
+
+1. MySQL : https://www.npmjs.com/package/mysql2
+2. PostgreSQL : https://www.npmjs.com/package/pg
+3. Oracle : https://www.npmjs.com/package/oracledb
+4. Dan lain-lain
+
+#### Masalah dengan Database Package Library
+
+Karena menggunakan database package library terlalu spesific dengan library yang digunakan, akhirnya kebanyakan programmer NodeJS menggunakan library ORM untuk memanipulasi data di database, leh karena itu, kita tidak akan menggunakan database package library secara langsung, kita akan menggunakan library ORM untuk memanipulasi data di database nya.
+
+## Pengenalan Object Relational Mapping
+
+- ORM (Object Relational Mapping) adalah teknik dalam pemrograman, dimana kita melakukan pemetaan data di database dalam konsep relational object
+- Oleh karena itu, ORM sering banyak digunakan di database dengan jenis relational, seperti MySQL, PostgreSQL, Oracle, dan sejenisnya
+- Konsep ORM sendiri adalah membuat representasi object di aplikasi yang merepresentasikan data (table) di database, sehingga ketika melakukan manipulasi data (table) di database, seakan-akan kita melakukan manipulasi object di pemrograman
+
+#### Contoh Library ORM di NodeJS
+
+1. Sequalize : https://sequelize.org/
+2. TypeORM : https://typeorm.io/
+3. Prisma : https://www.prisma.io/
+
+## Pengenalan Prisma
+
+Prisma adalah salah satu ORM di NodeJS yang populer, prisma memiliki banyak fitur untuk mempermudah kita mengelola data di database, dari mulai migration, schema, dan juga type safe, prisma sendiri selain bisa digunakan ketika kita menggunakan JavaScript, prisma juga terintegrasi dengan baik dengan TypeScript
+
+Prisma adalah library yang Free dan OpenSource
+
+- https://www.prisma.io/
+
+## Prisma Component
+
+Prisma memiliki banyak komponen yang bisa digunakan, seperti
+
+- `Prisma Schema`, untuk memetakan schema data di database dengan di aplikasi
+- `Prisma Client`, sebagai client untuk ORM
+- `Prisma Migrate`, sebagai database migration untuk mengelola versi schema di database
+- `Prisma CLI`, aplikasi berbasis terminal untuk mengelola project prisma
+- `Prisma Studio`, aplikasi berbasis UI untuk mengelola data di database kita secara mudah
+- `Introspection`, untuk membuat Prisma Schema secara otomatis dari table di database yang sudah ada, cocok untuk migrasi dari aplikasi yang sudah jadi ke Prisma
+
+## Menginstal Prisma
+
+Untuk menginstall prisma, kita bisa menggunakan perintah :
+
+```bash
+npm install prisma --save-dev
+```
+
+Selanjutnya, kita tidak bisa langsung menggunakan prisma, kita perlu melakukan pengaturan terlebih dahulu menggunakan Prisma CLI yang terdapat di perintah :
+
+```bash
+npx prisma
+```
+
+## Membuat Project Prisma
+
+Untuk membuat project prisma pertama kali, kita perlu menggunakan perintah :
+
+```bash
+npx prisma init
+```
+
+Secara otomatis prisma akan membuat file : `.env` yang berisi konfigurasi environment variable
+
+di `prisma/schema.prisma`, yang berisikan schema pemetaan dengan database
+
+## Database Connection
+
+- Secara default, saat membuat project prisma, prisma akan menggunakan koneksi database `PostgreSQL`
+- Disini kita akan menggunakan `MySQL`, jadi kita akan ubah konfigurasinya ke MySQL
+- Prisma menggunakan konsep database url untuk membuat koneksi ke databasenya, dan formatnya bisa kita lihat tergantung jenis database nya disini :
+  - https://www.prisma.io/docs/concepts/database-connectors
+
+```js title="schema.prisma"
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+```
+
+```
+DATABASE_URL="mysql://root:@localhost:3306/dbname"
+```
+
+## Generate
+
+Prisma memiliki fitur type safe (beberapa IDE bisa melakukan auto complete), hal ini dikarenakan prisma akan melakukan generate kode dari schema yang kita buat, setiap kita melakukan perubahan kode di file schema prisma, kita harus melakukan perintah :
+
+```bash
+npx prisma generate
+```
+
+Hal ini agar kode perubahan di schema akan dibuat dalam bentuk kode JavaScript
+
+```js
+model Sampel {
+  id   String @id
+  name String
+}
+```
+
+lalu jalankan perintah migrate di terminal :
+
+```bash
+npx prisma migrate dev
+```
+
+## Prisma Client
+
+Prisma Client merupakan komponen utama di Prisma untuk fitur ORM nya, dimana kita import dari package `@prisma/client`, prisma Client akan secara otomatis membaca data dari environment file .env dan juga informasi koneksi database dari prisma schema file.
+
+```js title="prisma-client.js"
+import { PrismaClient } from "@prisma/client";
+
+export const prismaClient = new PrismaClient();
+```
+
+```js title="prisma-client.test.js"
+import { prismaClient } from "../src/prisma-client";
+
+describe("Prisma Client", () => {
+  it("should be abble connect prisma client", async () => {
+    await prismaClient.$connect();
+    // do something
+    await prismaClient.$disconnect();
+  });
+});
+```
+
+### Configurasi Prisma Client
+
+- Saat membuat Prisma Client juga, kita bisa melakukan pengaturan Log untuk Prisma Client
+  - https://www.prisma.io/docs/reference/api-reference/prisma-client-reference
+- Jika Prisma Client cukup dibuat satu kali, lantas bagaimana jika aplikasi kita banyak yang membutuhkan koneksi ke database? Prisma Client sudah mengatur jumlah koneksi dalam pool (tempat menyimpan koneksi)
+- Kita juga bisa mengatur jumlah koneksi dan timeout pada konfigurasi database url kita
+  - https://www.prisma.io/docs/concepts/database-connectors
+
+```js
+export const prismaClient = new PrismaClient({
+  // highlight-start
+  errorFormat: "pretty",
+  log: ["info", "warn", "error", "query"],
+  // highlight-end
+});
+```
+
+```
+DATABASE_URL="mysql://root:@localhost:3306/dbname?connection_limit=5"
+```
+
+## Tag Function
+
+- Sebelum kita lanjut materi prisma, kita perlu paham dulu tentang Tag Function di JavaScript
+- Tag Function adalah sebuah fitur yang sebenarnya jarang digunakan, namun di Prisma, hal ini digunakan untuk mempermudah kita mengirim perintah SQL ke database menggunakan Prisma Client
+- Sebelumnya kita sudah tahu tentang fitur String Template di JavaScript, dimana kita bisa menangkap data dari variable di String
+- Tag Function adalah fitur seperti String Template yang bisa dilakukan ketika kita memanggil function
+
+```js
+function tagFunction(array, ...args) {
+  console.info(array);
+  console.info(args);
+}
+```
+
+```js
+test("tag function", () => {
+  const firstName = "Joko";
+  const lastName = "Santoso";
+
+  tagFunction`Hello ${firstName} ${lastName}!, How are you?`;
+  // [ 'Hello ', ' ', '!, How are you?' ] -> array
+  // [ 'Joko', 'Santoso' ] -> args
+  tagFunction`By ${firstName} ${lastName}!, See yiu latter`;
+  // [ 'By ', ' ', '!, See yiu latter' ] -> array
+  // [ 'Joko', 'Santoso' ] -> args
+});
+
+test("tag function sql", () => {
+  const name = "Joko; DROP table users";
+  const age = 21;
+
+  tagFunction`SELECT * FROM users WHERE name = ${name} AND age = ${age}`;
+  // [ 'SELECT * FROM users WHERE name = ', ' AND age = ', '' ] -> array
+  // [ 'Joko; DROP table users', 21 ] -> args
+});
+```
+
+:::note
+Sederhananya, Tag Function adalah mengubah data String Template menjadi parameter yang dipecah dalam dua array, array pertama menjadi data String nya, dan Array kedua menjadi data parameter nya
+
+Misal untuk data `Hello ${name}!, how are you?`, dimana misal $name adalah Eko, akan diubah menjadi :
+
+Array 1 : [“Hello ”, “!, how are you?”]
+
+Array 2 : [Joko]
+
+:::
+
+## Execute SQL
+
+- Prisma Client memiliki method bernama `$executeRaw()`, yang bisa digunakan untuk mengirim data SQL untuk memanipulasi data, seperti INSERT, UPDATE atau DELETE
+- Return value dari `$executeRaw()` adalah `Promise<Number>` yang berisi jumlah data yang terkena impact dari operasi SQL yang kita lakukan
+- `$executeRaw()` menggunakan Tag Function untuk membuat SQL nya, dan ini sudah aman dari SQL Injection, sehingga kita tidak perlu takut orang mengirim data yang berbahaya yang bisa membuat kode SQL kita rusak
+
+```js
+import { prismaClient } from "../src/prisma-client";
+
+describe("Prisma CLient", () => {
+  it("should be able to execute sql", async () => {
+    const id = "2";
+    const name = "Joko Santoso";
+
+    const impacted =
+      await prismaClient.$executeRaw`INSERT INTO sampel(id, name) VALUES (${id}, ${name})`;
+
+    expect(impacted).toBe(1);
+  });
+});
+```
+
+## Query SQL
+
+- Prisma Client memiliki method bernama `$queryRaw()`, yang bisa digunakan untuk mengirim SQL query untuk mengambil data menggunakan SELECT
+- Return value dari `$queryRaw()` adalah `Promise<Array>` yang berisikan data hasil query nya
+- `$queryRaw()` menggunakan Tag Function untuk membuat SQL nya, dan ini sudah aman dari SQL Injection juga
+
+```js
+import { prismaClient } from "../src/prisma-client";
+
+describe("Prisma CLient", () => {
+  it("should be able to query sql", async () => {
+    const id = "2";
+
+    const samples = await prismaClient.$queryRaw`SELECT * FROM sampel WHERE id = ${id}`;
+    console.info(samples); //  [ { id: '1', name: 'Joko Santoso' }, ... ]
+  });
+});
+```

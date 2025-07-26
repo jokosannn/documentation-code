@@ -1,0 +1,188 @@
+---
+title: PHP Framework (Laravel)
+description: Belajar PHP Framework
+---
+
+# Laravel
+
+## Instal Laravel
+
+### Installation Via Composer
+
+```bash
+composer create-project laravel/laravel name-app
+```
+
+### Installation Via Laravel Instaler
+
+```bash
+composer global require laravel/installer
+
+laravel new example-app
+```
+
+Next, run project:
+
+```bash
+php artisan serve
+```
+
+## Blade Template Engine
+
+### Create Component
+
+```bash
+php artisan make:component Navbar
+php artisan make:component Navbar --view
+```
+
+Next, memanggil component
+
+```html
+<x-navbar></x-navbar>
+```
+
+### Slot
+
+```html title="navbar.blade.php"
+<nav>
+  <h1>{{ $slot }}</h1>
+</nav>
+```
+
+```html title="home.blade.php"
+<x-navbar>Logo</x-navbar>
+```
+
+### Inheritens
+
+```js title="web.php"
+Route::get('/', function () {
+  return view('home', ["title" => "Home Page"]);
+});
+```
+
+```html title="header.blade.php"
+<header>
+  <h1>{{ $slot }}</h1>
+</header>
+```
+
+```html title="navbar.blade.php"
+<nav>
+  <x-header>{{ $title }}</x-header>
+</nav>
+```
+
+```html title="home.blade.php"
+<x-navbar>
+  <x-slot:title>{{ $title }}</x-slot:title> // opsi 1
+
+  <x-slot name="title">{{ $title }}</x-slot> // opsi 2
+</x-navbar>
+```
+
+### Other
+
+```js title="navlink.blade.php"
+@props(['active' => false])
+
+@php
+    $linkClasses = $active ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white';
+@endphp
+
+<a
+  {{ $attributes->merge(['class' => "$linkClasses rounded-md px-3 py-2 text-sm font-medium capitalize"]) }}
+  aria-current="{{ $active ? 'page' : 'false' }}"
+>
+    {{ $slot }}
+</a>
+```
+
+```html title="navbar.blade.php"
+<x-navlink href="/" :active="request()->is('/')" class="capitalize"> home </x-navlink>
+<x-navlink href="/" :active="request()->is('post*')" class="capitalize"> post </x-navlink>
+```
+
+## Method
+
+### String
+
+#### Limit
+
+```js
+Str::limit("value", 100);
+
+// output 👇
+// lorem ipsum bla bla bla bla (100) ...........
+```
+
+### Format Time
+
+```js
+$post->created_at->diffForHumans() // 3 minutes ago
+$post->created_at->format("j F Y") // 16 mei 2024
+```
+
+## View Data
+
+```js title="web.php"
+use App\Models\Post;
+
+Route::get('/posts', function () {
+  return view('home', ["posts" => Post::all()]);
+});
+```
+
+Lakukan ini jika ingin mencari data berdasarkan id atau slug 👇
+
+```js title="web.php"
+Route::get('/post/{post:slug}', function (Post $post) {
+  return view('home', ["posts" => $post]);
+});
+```
+
+```html title="posts.blade.php"
+@foreach ($posts as $post)
+<article class="border border-slate-200/20 p-2 rounded-md shadow-sm">
+  <h2 class="tracking-tight text-2xl font-medium capitalize">{{ $post['title'] }}</h2>
+  <div class="text-sm text-gray-500 mb-4">
+    <a href="#">{{ $post['author'] }}</a> | {{ $post->created_at->diffForHumans() }}
+  </div>
+  <p>{{ Str::limit($post['content'], 100) }}</p>
+  <a href="/post/{{ $post['slug'] }}" class="text-blue-500 text-sm">Read More &raquo;</a>
+</article>
+@endforeach
+```
+
+## Eloquent
+
+### Create Models
+
+```bash
+php artisan make:model Post
+```
+
+- Lihat Selangkapnya
+  - https://laravel.com/docs/11.x/eloquent
+  - https://laravel.com/docs/11.x/eloquent#generating-model-classes
+
+:::note
+Eloquent will assume the `Post` model stores records in the `Posts` table, while an `AirTrafficController` model would store records in an `air_traffic_controllers` table
+:::
+
+Jika nama tablenya berbeda dengan nama modelnya, maka kita harus menambahkan nama tabelnya di dalam model
+
+```js
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Flight extends Model
+{
+  protected $table = 'my_post';
+  protected $primaryKey = 'post_id';
+}
+```

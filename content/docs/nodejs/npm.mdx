@@ -1,0 +1,297 @@
+---
+title: Nodejs NPM
+description: Belajar Nodejs NPM
+---
+
+# NPM
+
+NodeJS NPM - Node Package Manager
+
+Slide PPT : https://docs.google.com/presentation/d/1-L4Nce46UlQa_drWGgQSrALsefX1cKs8
+
+## Pengenalan Node Package Manager
+
+- Saat kita membuat aplikasi, biasanya kita akan buat dalam bentuk project
+- Sederhananya, project adalah directory/folder yang berisikan kode program dan dependency (library) yang kita butuhkan
+- Melakukan management kode program dan dependency management secara manual bukanlah hal yang menyenangkan
+- Untungnya, NodeJS menyediakan NPM (Node Package Manager) yang bisa kita gunakan untuk melakukan management project NodeJS
+
+## Kegunaan NPM
+
+- NPM tidak hanya digunakan untuk melakukan management project NodeJS
+- NPM juga bisa digunakan untuk melakukan dependency management yang kita butuhkan dalam project yang kita buat
+- NPM bisa digunakan untuk download dependency, update dan upgrade dependency secara otomatis, tanpa harus kita lakukan secara manual dengan cara download dependency secara manualz
+
+## Menginstall NPM
+
+- Kita tidak perlu menginstall NPM secara manual
+- Saat kita menginstall NodeJS, secara otomatis NPM akan terinstall juga
+- Untuk mengecek versi NPM yang terinstall di komputer kita, kita bisa gunakan perintah :
+
+```bash title="terminal"
+npm --version
+```
+
+## File package.json
+
+- Saat kita melakukan management project menggunakan NPM
+- NPM menyimpan semua konfigurasi project di file bernama `package.json`
+- Semua konfigurasi project dan juga dependency kita simpan dalam file package.json yang terdapat di dalam directory project
+- Kita bisa buat file package.json secara manual, atau menggunakan auto generate secara otomatis menggunakan NPM
+
+Otomatis membuat file `package.json`
+
+```bash
+npm init -y
+```
+
+```json title="package.json"
+{
+  "name": "project-name",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+```
+
+## Project Type
+
+- Secara default, saat kita membuat project NodeJS, NodeJS menggunakan commonjs
+- Oleh karena itu, ketika kita ingin menggunakan JavaScript Modules, kita harus mengubah file nya menjadi file mjs
+- Namun, kita juga bisa mengubah default project type dari commonjs menjadi js modules, dengan cara mengubah type di package.json
+- Sangat direkomendasikan sekarang menggunakan js modules dibanding commonjs, karena js modules sudah menjadi standard di JavaScript
+
+```json title="package.json"
+{
+  "name": "project-name",
+  "version": "1.0.0",
+  "description": "",
+  // highlight-start
+  "type": "module",
+  // highlight-end
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+```
+
+## Script
+
+- NPM memiliki fitur yang bernama script, dimana kita bisa menyediakan perintah script yang nanti bisa digunakan untuk menjalankan perintah lainnya
+- Penggunaan script ini biasanya digunakan untuk mempermudah ketika kita menjalankan perintah yang panjang
+- Untuk menambahkan script, kita bisa tambahkan script nya di package.json
+
+```json title="package.json"
+{
+  "name": "project-name",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    // highlight-start
+    "dev": "node index.js",
+    // highlight-end
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+```
+
+Menjalankan script: `npm run nama-script`
+
+```bash
+npm run dev
+```
+
+## Special Script
+
+- Script di package.json terdapat beberapa yang spesial atau khusus
+- Script tersebut tidak perlu dijalankan menggunakan npm run-script namascript, tapi bisa langsung dijalankan menggunakan perintah npm namascript
+- Contoh special script yaitu : `start`, `stop`, `test`, `restart`, `uninstall`, `version`, dan lain-lain
+- Selain itu, terdapat script spesial untuk script diatas, kita bisa gunakan gunakan prefix pre sebagai script yang akan dijalankan sebelumnya, dan prefix post sebagai script yang dijalankan setelahnya
+- Misal ketika kita gunakan perintah `npm start`, maka akan menjalankan script prestart, start dan poststart
+
+## Export Module
+
+### Main
+
+- Attribute main adalah entry point yang akan di-load ketika kita me-load NodeJS Project / Package
+- Pada kasus ketika kita membuat aplikasi, mungkin tidak terlalu berguna, tapi pada kasus ketika kita membuat library yang akan digunakan di banyak project, baru attribute main ini akan terlihat kegunaanya
+
+```json title="package.json"
+{
+  "name": "project-name",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  // highlight-start
+  "main": "index.js"
+  // highlight-end
+  // ...
+}
+```
+
+### Export
+
+- Problem ketika kita menggunakan attribute main adalah, kita cuma bisa mengekspos satu file JS, oleh karena itu penggunaan attribute main sebenarnya sudah tidak direkomendasikan lagi
+- Sebagai penggantinya, terdapat attribute export yang bisa digunakan sebagai konfigurasi untuk mengekspos file JS
+- Yang menarik dari fitur export ini, kita bisa membuat alias ketika mengekspos file JS, sehingga tidak perlu menggunakan nama file JS aslinya
+
+```json title="package.json"
+{
+  "name": "project-name",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  // highlight-start
+  "exports": {
+    ".": "./index.js",
+    "./write": "./write.js"
+  }
+  // highlight-end
+  // ...
+}
+```
+
+## Menggunakan Module
+
+- Untuk menggunakan module yang sudah di export, kita cukup gunakan import dari nama module yang di export tersebut, namun ganti tanda . (titik) dengan nama package yang ada di package.json
+
+- Misal:
+
+`“.”` menjadi `“belajar-nodejs-npm”`
+
+`“./write”` menjadi `“belajar-nodejs-npm/write”`
+
+```js title="export.js"
+import { summAll } from "node-library"; // '.'
+import { riteToFile } from "node-library/write"; // './write'
+```
+
+## Dependency Management
+
+### Install Dependency
+
+- Secara otomatis NPM akan download package yang ada di dependency ke dalam folder `node_modules`
+- Selain itu, NPM juga akan membuat file `package-lock.json` yang berisikan informasi versi package yang di download, ini untuk mempermudah ketika kita melakukan download ulang library di komputer lain
+
+### Install Semua Dependency (development, production)
+
+```bash title="terminal"
+npm install nama-package@version
+npm i nama-package@version
+```
+
+### Install Dependency Production
+
+```bash title="terminal"
+npm install --production
+```
+
+### Install Dependency Development
+
+```bash title="terminal"
+npm install nama-package@version --save-dev
+npm i -D nama-package@version
+```
+
+:::tip
+
+- `dependencies` adalah package yang dibutuhkan oleh aplikasi di lingkungan runtime atau production, tanpa package ini aplikasi kita tidak akan bekerja dengan semestinya.
+- `devDependencies` adalah package yang dibutuhkan oleh aplikasi di lingkungan development dan testing. Biasanya package di devDependencies dibutuhkan untuk development namun tidak dibutuhkan ketika aplikasi dirilis ke costumer
+  :::
+
+## Dependency Version
+
+### Semantic Version
+
+- NodeJS merekomendasikan menggunakan semantic version dalam menentukan format version pada package yang kita buat
+- Jika kita perhatikan, kebanyakan package di [NPM](https://www.npmjs.com/) menggunakan semantic version
+- Web Semantic versioning : https://semver.org/
+- Versi semantik ditulis dalam bentuk `MAJOR.MINOR.PATCH`.
+- Aturan semantic version:
+  - Jika `mengubah fitur`, dan melakukan code break, upgrade versi `MAJOR`
+  - Jika `menambah fitur`, tidak ada code break, upgrade versi `MINOR`
+  - Jika `melakukan bugfix`, tidak ada code break, upgrade versi `PATCH`
+
+| Versi | Keterangan                                                                             |
+| ----- | -------------------------------------------------------------------------------------- |
+| x.    | Download versi terbaru dan update ke versi terbaru walaupun MAJOR berubah              |
+| 1.x   | Download versi 1 terbaru, update ke versi terbaru, tapi MAJOR tetap di 1               |
+| 1.1.x | Download versi 1.1 terbaru, update ke versi terbaru, tapi MAJOR dan MINOR tetap di 1.1 |
+| 1.1.1 | Selalu download versi 1.1.1, tidak akan update walaupun ada versi baru                 |
+
+| Versi  | Keterangan                                                                                             |
+| ------ | ------------------------------------------------------------------------------------------------------ |
+| ~1.1.1 | Download versi 1.1.1, jika ada update, lakukan update, namun hanya update jika PATCH berubah           |
+| ^1.1.1 | Download versi 1.1.1, jika ada update, lakukan update, namun hanya update jika MINOR dan PATCH berubah |
+
+Detail : https://semver.npmjs.com/
+
+## Membuat Library Sendiri
+
+Siapkan terlebih dahulu project anda yang akan di publish ke npm.
+
+Next, login ke Web NPM dengan menggunakan perintah :
+
+```bash title="terminal"
+npm adduser
+```
+
+Setelah login, sekarang kita bisa melakukan publish package ke web NPM dengan menggunakan perintah :
+
+```bash title="terminal"
+npm publish
+```
+
+:::note
+Perlu diingat, nama package itu harus unique secara global, jadi pastikan sebelum publish ke web NPM, pastikan tidak ada package dengan nama yang sama
+:::
+
+Next, jika inggin menginstall package nya cukup jalankan terminal denagn perintah :
+
+```bash
+npm install nama-package
+```
+
+Jika inggin `mengupdate` library anda, cukup dengan menjalankan perintah :
+
+```bash title="terminal"
+npm publish
+```
+
+## Ignore File
+
+- Saat kita publish package ke web NPM, secara default, semua file yang terdapat di project akan di publish ke web NPM
+- Kadang kita ingin meng-ignore beberapa file agar tidak ikut terpublish ke web NPM
+- Untuk itu, kita bisa membuat file `.npmignore`
+- Format pemulisan `.npmignore` sama dengan format penulisan `.gitignore`
+- Jadi kita kita sudah terbiasa menggunakan Git, maka kita tidak perlu belajar lagi.
+
+## Update Library
+
+Untuk melakukan update library dependency, yang perlu kita lakukan adalah mengubah versi dari dependency nya
+Atau jika kita sudah menggunakan version ~ atau ^, maka kita bisa secara otomatis melakukan update dengan menggunakan perintah :
+
+```bash
+npm update nama-package
+```
+
+Atau jika kita ingin melakukan update semua dependency, gunakan perintah:
+
+```bash
+npm update
+```
